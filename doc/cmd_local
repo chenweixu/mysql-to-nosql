@@ -1,0 +1,90 @@
+================================
+show master logs;
+
+show master status;
+
+reset master;
+
+/opt/app/mysql/mysql.server stop
+
+
+truncate table T_APP1_0626;
+
+================================
+# influx
+================================
+# run
+/opt/app/influxdb/usr/bin/influxd run -config /opt/app/influxdb/etc/influxdb/influxdb.conf \
+    -pidfile /opt/app/influxdb/var/run/influxdb.pid >> /opt/app/influxdb/var/log/influxdb/influxd.log 2>> /opt/app/influxdb/var/log/influxdb/influxd.log &
+
+/opt/app/influxdb/influxd -config /opt/app/influxdb/influxdb.conf
+
+
+/opt/app/influxdb/influx
+
+
+
+show retention policies on "test2"
+
+create retention policy "3d" on "test2" duration 3d replication 1 default;
+
+alter retention policy "w1" on "test2" duration 3w default;
+
+
+create database test2;
+drop database test2;
+
+
+show measurements
+
+drop measurement user_login
+
+
+curl -G 'http://localhost:8086/query?pretty=true' \
+    --data-urlencode "db=test2" \
+    --data-urlencode "q=SELECT * FROM user_login where LOGNAME='15000000001'"
+
+
+curl -G 'http://localhost:8086/query?pretty=true' \
+    --data-urlencode "db=test2" \
+    --data-urlencode "epoch=s" \
+    --data-urlencode "q=SELECT * FROM user_login where LOGNAME='15000000001'"
+
+================================
+# grafana
+
+SELECT count("result") FROM "w1"."user_login" WHERE $timeFilter GROUP BY time(1s) fill(null)
+
+SELECT count("result") FROM "w1"."user_login" WHERE ("user_type" = '2') AND $timeFilter GROUP BY time(1s) fill(null)
+
+SELECT count("result") FROM "w1"."user_login" WHERE ("spid" = '12006') AND $timeFilter GROUP BY time(1s) fill(null)
+
+
+/opt/app/grafana/bin/grafana-server --config /opt/app/grafana/conf/grafana.ini
+
+nohup /opt/app/grafana/bin/grafana-server \
+-config /opt/app/grafana/conf/grafana.ini \
+-pidfile /opt/app/grafana/run.pid >> /opt/app/grafana/strout.log &
+
+
+=======================================================================
+# kafka
+
+/opt/app/zookeeper/bin/zkServer.sh start
+    tcp port: 12181
+
+/opt/app/zookeeper/bin/zkServer.sh stop
+
+
+/opt/app/kafka/bin/kafka-server-start.sh -daemon /opt/app/kafka/config/server.properties
+/opt/app/kafka/bin/kafka-server-stop.sh
+
+
+
+/opt/app/kafka/bin/zookeeper-server-start.sh -daemon /opt/app/kafka/config/zookeeper.properties
+/opt/app/kafka/bin/zookeeper-server-stop.sh
+
+
+/opt/app/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server 10.2.1.5:29092 --topic test2work1 --from-beginning
+=======================================================================

@@ -1,0 +1,27 @@
+---
+log_level: 20
+mysql:
+  settings:
+    host: 10.2.1.5
+    port: 3306
+    user: sync
+    passwd: Sync_Sync1
+  dbname: test2
+  server_id: 80
+  tables:
+    - T_APP1_0626
+  table_head:
+    - TL_APP1_
+
+kafka:
+  host: 10.2.1.5:29092
+  topic: testtopic
+  consumer_group_id: 200
+
+influxdb:
+  host: "10.2.1.5",
+  port: 8086,
+  user: root,
+  passwd: None
+  db: test2
+
